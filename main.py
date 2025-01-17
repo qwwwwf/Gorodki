@@ -1,6 +1,8 @@
+import pygame
+
 from src.utils import *
 from src.objects import *
-from src.components.effects import apply_tv_scanlines
+from src.components.effects import apply_tv_scanlines, create_particles
 
 
 class Game:
@@ -10,9 +12,11 @@ class Game:
 
         self.screen = pygame.display.set_mode(SIZE)
         self.clock = pygame.time.Clock()
-        self.time = 0
 
-        self.settings = {}
+        # Game stats
+        self.bat_thrown = 0
+        self.figures_knocked = 0
+        self.time = 120
 
     @staticmethod
     def terminate():
@@ -21,10 +25,10 @@ class Game:
 
     # TODO: разбить основной код игры на отдельные файлы и функции
     def run(self):
-        # Init objects
-        figure = Figure(self.screen, 'figure1.txt')
+        # Init game objects
         launch_line = LaunchLine(self.screen)
-        time = 20
+        figure = Figure(self.screen, 'figure1.txt')
+        bat = Bat(self.screen)
 
         while True:
             for event in pygame.event.get():
@@ -33,7 +37,7 @@ class Game:
                         self.terminate()
 
                     case pygame.K_SPACE:
-                        pass
+                        bat.thrown()
 
                     # Если клавиша зажата
                     case pygame.KEYDOWN:
@@ -41,39 +45,58 @@ class Game:
 
                         if ctrl_pressed and event.key == pygame.K_q:
                             print('TEST')
+                        else:
+                            match event.key:
+                                case pygame.K_LEFT:
+                                    bat.is_moving = True
+                                    bat.is_right_move = False
+
+                                case pygame.K_RIGHT:
+                                    bat.is_moving = True
+                                    bat.is_right_move = True
 
                     # Если клавиша отжата
                     case pygame.KEYUP:
-                        pass
+                        bat.is_moving = False
+
+                    # TEST
+                    case pygame.MOUSEBUTTONDOWN:
+                        create_particles(pygame.mouse.get_pos())
 
             self.screen.fill(BLUE)
-            time -= 1 / GAME_FPS
+            self.time -= 1 / GAME_FPS
+            bat.auto_delay -= 1 / GAME_FPS
 
             # Rendering objects
             launch_line.render()
             figure.render()
+            bat.render()
 
-            # Score
-            GameInfo(self.screen, 25, 350, 60, text='00')
-            GameInfo(self.screen, 25, 415, 18, 'Брошено\nбит')
+            # Game info
+            GameInfo(self.screen, 25, 350, 60, text=str(self.figures_knocked).ljust(2, '0'))
+            GameInfo(self.screen, 25, 415, 19, 'Брошено\nбит')
 
-            GameInfo(self.screen, -25, 350, 60, text='00')
-            GameInfo(self.screen, -25, 415, 18, 'Выбито\nфигур')
+            GameInfo(self.screen, -25, 350, 60, text=str(self.bat_thrown).ljust(2, '0'))
+            GameInfo(self.screen, -25, 415, 19, 'Выбито\nфигур')
 
-            if int(time) > 0:
-                GameInfo(self.screen, 175, 750, 25, f'Осталось времени: {time:.0f} сек.')
+            if int(self.time) > 0:
+                GameInfo(self.screen, 175, 750, 25, f'Осталось времени: {self.time:.0f} сек.')
             else:
                 GameInfo(self.screen, 245, 750, 25, 'Игра закончена')
+
+            if bat.auto_delay <= 0:
+                self.time = 0
 
             # Rendering effects
             apply_tv_scanlines(self.screen, self.time)
 
-            # Display update
+            # Display & Sprites update
             parts_group.draw(self.screen)
+            all_sprites.draw(self.screen)
+            all_sprites.update()
+
             pygame.display.update()
             self.clock.tick(GAME_FPS)
-
-            self.time += 1
 
 
 if __name__ == '__main__':
