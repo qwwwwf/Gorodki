@@ -20,6 +20,6 @@ class ModEnum(Enum):
     __Nothing = 9
 
 
-class GameState(Enum):
-    MENU = 0
-    FIELD = 1
+class SideEnum(Enum):
+    LEFT = 0
+    RIGHT = 1
