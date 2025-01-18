@@ -2,6 +2,7 @@ import pygame
 from src.utils.loaders import load_image
 
 # Colors
+BLACK = (0, 0, 0)
 BLUE = (116, 208, 221)
 DARK_BLUE = (6, 58, 69)
 LIGHT_BLUE = (173, 225, 236)

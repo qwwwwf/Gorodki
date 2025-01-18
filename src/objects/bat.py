@@ -18,6 +18,7 @@ class Bat(GameObject, pygame.sprite.Sprite):
 
         self.x = 340
         self.y = 685
+        self.launch_line_y = self.y
 
         self.is_moving = False
         self.is_thrown = False
@@ -86,8 +87,15 @@ class Bat(GameObject, pygame.sprite.Sprite):
 
         for part in parts_group:
             if pygame.sprite.collide_mask(self, part):
+                if self.is_explosive:
+                    for part in parts_group:
+                        part.speed_y = -10
+                        part.is_knocked = True
+                    break
+
                 part.speed_y = -10
                 part.is_knocked = True
+
 
         # Отрисовка биты
         self.draw()

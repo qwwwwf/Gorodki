@@ -1,6 +1,6 @@
 from src.utils import *
 from src.objects import *
-from src.components.effects import apply_tv_scanlines, create_particles
+from src.components import apply_tv_scanlines, create_particles
 
 
 class Game:
@@ -20,8 +20,9 @@ class Game:
         self.game_time = DEFAULT_GAME_TIME
         self.game_info = {
             'level': 1,
-            'modifiers': []  # (id модификатора, значение модификатора), пример: (1, 1.05) - ускорение 1.05x
+            'modifiers': generate_game_modifiers()
         }
+        print(self.game_info)
 
     @staticmethod
     def terminate():
@@ -42,6 +43,7 @@ class Game:
         launch_line = LaunchLine(self.screen)
         figure = Figure(self.screen, f'figure{self.game_info["level"]}.txt')
         bat = Bat(self.screen)
+        barrier = Barrier(self.screen)
 
         while True:
             for event in pygame.event.get():
@@ -89,6 +91,7 @@ class Game:
                 launch_line.render()
                 figure.render()
                 bat.render()
+                barrier.render()
 
                 # Render game info
                 GameInfo(self.screen, (25, 350), 60, text=str(bat.thrown_count).rjust(2, '0'))
