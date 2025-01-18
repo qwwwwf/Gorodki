@@ -1,8 +1,38 @@
+import random
 import pygame
 
 from .game_object import GameObject
-from src.utils import SideEnum, load_image, load_figure, generate_figure, LIGHT_BLUE, DARK_BLUE, parts_group, \
-    DEFAULT_FIGURE_SPEED
+from src.utils import load_image, load_figure, LIGHT_BLUE, DARK_BLUE, parts_group, tile_images, DEFAULT_FIGURE_SPEED
+
+
+# Генерация фигуры по её карте
+def generate_figure(figure_map: list):
+    x, y = 0, 0
+
+    for y in range(len(figure_map)):
+        for x in range(len(figure_map[y])):
+            if figure_map[y][x] == '#':
+                Part(x, y)
+
+    return x, y
+
+
+class Part(pygame.sprite.Sprite):
+    def __init__(self, x: int | float, y: int | float):
+        super().__init__(parts_group)
+        self.image = tile_images['part']
+        self.rect = self.image.get_rect().move(25 * x + 255, 25 * y + 75)
+        self.offset_x = x
+        self.offset_y = y
+        self.speed_y = 0
+        self.is_knocked = False
+
+    def update(self):
+        if self.is_knocked:
+            self.rect.y += self.speed_y
+
+            if self.rect.y < -self.rect.height:
+                self.kill()
 
 
 class Figure(GameObject):
@@ -10,7 +40,7 @@ class Figure(GameObject):
         super().__init__(screen)
         self.x = 255
         self.y = 50
-        self.field_size = self.field_width, self.field_height = 200, 200
+        self.field_size = self.field_width, self.field_height = 175, 175
         self.speed = speed
 
         # Загрузка изображения фигуры
@@ -21,7 +51,7 @@ class Figure(GameObject):
 
         self.__delta = 20
         self.__is_moving = True
-        self.__side_moving = SideEnum.LEFT
+        self.__is_right_move = False
         self.__speed_boost = 1
 
     def draw_field(self):
@@ -29,41 +59,38 @@ class Figure(GameObject):
         pygame.draw.rect(self.screen, DARK_BLUE, (self.x, self.y, *self.field_size), 3)
 
     def draw_figure(self):
-        # TODO: сделать совместное движение с полем фигуры
-        move_reverse = 1
-
-        if self.__side_moving == SideEnum.LEFT:
-            move_reverse = -1
-
         for part in parts_group:
-            part.rect.x += self.speed * self.__speed_boost * move_reverse
+            if not part.is_knocked:
+                part.rect.x = self.x + part.rect.width * part.offset_x
+                part.rect.y = self.y + part.rect.width * part.offset_y
+        parts_group.update()
 
     def update(self):
         if self.__is_moving:
-            match self.__side_moving:
-                case SideEnum.LEFT:
-                    future_x = self.x - (self.speed * self.__speed_boost)
+            if self.__is_right_move:
+                future_x = self.x + (self.speed * self.__speed_boost)
 
-                    if future_x > self.__delta:
-                        self.x -= self.speed * self.__speed_boost
-                    else:
-                        self.__side_moving = SideEnum.RIGHT
-                        self.__speed_boost = 1.5
+                if self.x + self.speed < (self.screen_width - self.field_width) - self.__delta // 2:
+                    self.x += self.speed * self.__speed_boost
+                else:
+                    self.__is_right_move = False
+                    self.__speed_boost = 1.65
 
-                case SideEnum.RIGHT:
-                    future_x = self.x - (self.speed * self.__speed_boost)
+                if future_x >= self.screen_width // 2 - self.__delta:
+                    if self.__speed_boost != 1:
+                        self.__speed_boost = 1
+            else:
+                future_x = self.x - (self.speed * self.__speed_boost)
 
-                    if self.x + self.speed < (self.screen_width - self.field_width) - self.__delta // 2:
-                        self.x += self.speed * self.__speed_boost
-                    else:
-                        self.__side_moving = SideEnum.LEFT
-                        self.__speed_boost = 1.75
+                if future_x > self.__delta:
+                    self.x -= self.speed * self.__speed_boost
+                else:
+                    self.__is_right_move = True
+                    self.__speed_boost = 1.55
 
-                    if future_x >= self.screen_width // 2 - self.__delta:
-                        if self.__speed_boost != 1:
-                            self.__speed_boost = 1
+        self.__delta = random.randint(15, 45)
 
     def render(self):
         self.update()
-        self.draw_figure()
         self.draw_field()
+        self.draw_figure()

@@ -5,7 +5,7 @@ from .game_object import GameObject
 
 
 class LaunchLine(GameObject):
-    def __init__(self, screen: pygame.Surface, y: int = 90):
+    def __init__(self, screen: pygame.Surface, y: int = 120):
         super().__init__(screen)
 
         self.size = self.width, self.height = self.screen_width, 15

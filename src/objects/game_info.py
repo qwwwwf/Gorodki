@@ -5,29 +5,37 @@ from .game_object import GameObject
 
 
 class GameInfo(GameObject):
-    def __init__(self, screen: pygame.Surface, x: int, y: int, size: int = 40, text: str = '00'):
+    def __init__(
+            self,
+            screen: pygame.Surface,
+            position: tuple[int, int],
+            size: int = 40,
+            text: str = '00',
+            color: tuple = DARK_BLUE,
+            is_center_pos: bool = False):
         super().__init__(screen)
 
         self.screen_rect = self.screen.get_rect()
 
         self.size = size
-        self.text =text
-        self.color = DARK_BLUE
-        self.font = pygame.font.Font('src/fonts/PIXY.ttf', self.size)
+        self.text = text
+        self.__color = color
+        self.__font = pygame.font.Font('src/resources/fonts/PIXY.ttf', self.size)
 
-        self.x = x
-        self.y = y
+        self.position = position
+        self.x, self.y = self.position
+        self.__is_center_pos = is_center_pos
 
         self.render()
 
-    def convert_to_image(self, text: str):
-        lines = text.split('\n')
+    def convert_to_image(self):
+        lines = self.text.split('\n')
 
         self.text_imgs = []
         self.text_rects = []
 
         for i, line in enumerate(lines):
-            text_img = self.font.render(line, True, self.color)
+            text_img = self.__font.render(line, True, self.__color)
             text_rect = text_img.get_rect()
 
             if self.x >= 0:
@@ -44,6 +52,11 @@ class GameInfo(GameObject):
             self.text_rects.append(text_rect)
 
     def render(self):
-        self.convert_to_image(self.text)
+        self.convert_to_image()
+
+        if self.__is_center_pos:
+            for text_rect in self.text_rects:
+                text_rect.center = self.x, self.y
+
         for text_img, text_rect in zip(self.text_imgs, self.text_rects):
             self.screen.blit(text_img, text_rect)

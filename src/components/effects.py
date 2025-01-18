@@ -75,8 +75,8 @@ class Particle(pygame.sprite.Sprite):
 
 
 def create_particles(position: tuple):
-    particle_count = 20
-    numbers = range(-5, 6)
+    particle_count = 25  # количество частиц
+    numbers = range(-6, 6)  # возможные скорости
 
     for _ in range(particle_count):
         Particle(position, random.choice(numbers), random.choice(numbers))

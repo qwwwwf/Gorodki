@@ -8,10 +8,10 @@ LIGHT_BLUE = (173, 225, 236)
 
 # Game's settings
 SIZE = WIDTH, HEIGHT = 700, 800
-GAME_FPS = 30
+GAME_FPS = 60
 
-DEFAULT_BIT_SPEED = 8.5  # pixels per second
-DEFAULT_FIGURE_SPEED = 2.75  # pixels per second
+DEFAULT_BIT_SPEED = 6.5  # pixels per second
+DEFAULT_FIGURE_SPEED = 3.1 # pixels per second
 DEFAULT_GAME_GRAVITY = 1
 
 DEFAULT_GAME_TIME = 120  # seconds
