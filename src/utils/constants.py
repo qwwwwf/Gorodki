@@ -1,5 +1,6 @@
 import pygame
-from src.utils.loaders import load_image
+from ..utils import load_image
+
 
 # Colors
 BLACK = (0, 0, 0)
@@ -20,9 +21,22 @@ DEFAULT_GAME_TIME = 120  # seconds
 # Sprites
 tile_images = {
     'part': load_image('part_of_figure.png'),
-    'star': load_image('star.png')
+    'part_of_field': load_image('part_of_field.png')
 }
 
 all_sprites = pygame.sprite.Group()
 parts_group = pygame.sprite.Group()
 star_group = pygame.sprite.Group()
+
+# Const info
+names_of_modifiers = {
+    1: 'ускорение',
+    2: 'замедление',
+    3: 'взрывная бита',
+    4: 'бита летит\nпод углом',
+    5: 'измененная длина\nбиты',
+    6: 'препятствие',
+    7: 'игровое время\nувеличено',
+    8: 'игровое время\nукорочено',
+    9: 'линия запуска\nне меняется'
+}

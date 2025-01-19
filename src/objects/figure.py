@@ -20,12 +20,18 @@ def generate_figure(figure_map: list):
 class Part(pygame.sprite.Sprite):
     def __init__(self, x: int | float, y: int | float):
         super().__init__(parts_group)
+
         self.image = tile_images['part']
         self.rect = self.image.get_rect().move(25 * x + 255, 25 * y + 75)
+
         self.offset_x = x
         self.offset_y = y
         self.speed_y = 0
+
         self.is_knocked = False
+
+        self.collision_sound = pygame.mixer.Sound('src/resources/sounds/collision_sound.wav')
+        self.collision_sound.set_volume(0.1)
 
     def update(self):
         if self.is_knocked:
@@ -38,10 +44,14 @@ class Part(pygame.sprite.Sprite):
 class Figure(GameObject):
     def __init__(self, screen: pygame.Surface, figure_filename: str, speed: int | float = DEFAULT_FIGURE_SPEED):
         super().__init__(screen)
+
         self.x = 255
         self.y = 50
         self.field_size = self.field_width, self.field_height = 175, 175
+
         self.speed = speed
+        self.__speed_boost = 1
+        self.default_speed_boost = 1
 
         # Загрузка изображения фигуры
         self.figure_image = load_image('part_of_figure.png')
@@ -52,7 +62,6 @@ class Figure(GameObject):
         self.__delta = 20
         self.__is_moving = True
         self.__is_right_move = False
-        self.__speed_boost = 1
 
     def draw_field(self):
         pygame.draw.rect(self.screen, LIGHT_BLUE, (self.x, self.y, *self.field_size))
@@ -68,11 +77,12 @@ class Figure(GameObject):
     def update(self):
         if self.__is_moving:
             if self.__is_right_move:
-                future_x = self.x + (self.speed * self.__speed_boost)
+                future_x = self.x + (self.speed * self.__speed_boost * self.default_speed_boost)
 
                 if self.x + self.speed < (self.screen_width - self.field_width) - self.__delta // 2:
-                    self.x += self.speed * self.__speed_boost
+                    self.x += self.speed * self.__speed_boost * self.default_speed_boost
                 else:
+                    self.__delta = random.randint(15, 45)
                     self.__is_right_move = False
                     self.__speed_boost = 1.65
 
@@ -80,15 +90,14 @@ class Figure(GameObject):
                     if self.__speed_boost != 1:
                         self.__speed_boost = 1
             else:
-                future_x = self.x - (self.speed * self.__speed_boost)
+                future_x = self.x - (self.speed * self.__speed_boost * self.default_speed_boost)
 
                 if future_x > self.__delta:
-                    self.x -= self.speed * self.__speed_boost
+                    self.x -= self.speed * self.__speed_boost * self.default_speed_boost
                 else:
+                    self.__delta = random.randint(15, 45)
                     self.__is_right_move = True
-                    self.__speed_boost = 1.55
-
-        self.__delta = random.randint(15, 45)
+                    self.__speed_boost = 1.5
 
     def render(self):
         self.update()

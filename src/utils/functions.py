@@ -1,6 +1,7 @@
 import random
 from src.utils import ModEnum
 
+
 def generate_game_modifiers() -> list[tuple[int, int | float | None, int | None]]:
     game_modifiers = random.choices(list(range(10)), weights=[55, 5, 5, 5, 5, 5, 5, 5, 5, 5], k=16)
 
@@ -9,29 +10,28 @@ def generate_game_modifiers() -> list[tuple[int, int | float | None, int | None]
             case ModEnum.BOOST.value:
                 game_modifiers[i] = game_modifiers[i], round(random.uniform(1.05, 1.8), 2), random.randint(0, 1)
 
-            case ModEnum.BAT_IS_EXPLOSIVE.value:
-                game_modifiers[i] = game_modifiers[i], round(random.uniform(1.05, 1.8), 2), random.randint(0, 1)
+            case ModEnum.SLOWDOWN.value:
+                game_modifiers[i] = game_modifiers[i], round(random.uniform(0.6, 0.9), 2), random.randint(0, 1)
 
             case ModEnum.BAT_HAS_ANGULAR_MOVEMENT.value:
-                game_modifiers[i] = game_modifiers[i], random.randint(120, 45)
+                game_modifiers[i] = game_modifiers[i], random.randint(70, 110)
 
             case ModEnum.BAT_EXTENSION.value:
-                game_modifiers[i] = game_modifiers[i], round(random.uniform(0.8, 1.4), 2)
+                game_modifiers[i] = game_modifiers[i], round(random.uniform(0.75, 1.25), 2)
 
             case ModEnum.INCREASE_GAME_TIME.value:
-                game_modifiers[i] = game_modifiers[i], round(random.uniform(1.2, 1.5), 2)
+                game_modifiers[i] = game_modifiers[i], round(random.uniform(1.1, 1.3), 2)
 
             case ModEnum.DECREASE_GAME_TIME.value:
-                game_modifiers[i] = game_modifiers[i], round(random.uniform(1.5, 2), 2)
+                game_modifiers[i] = game_modifiers[i], round(random.uniform(0.7, 0.9), 2)
 
-            case ModEnum.SLOWDOWN.value | ModEnum.BARRIER.value | ModEnum.UNCHANGEABLE_LAUNCH_LINE.value:
+            case _:
                 game_modifiers[i] = game_modifiers[i],
 
     return game_modifiers
 
 
 def parse_game_modifiers(modifiers_list: list, level: int) -> dict:
-    level -= 1
     game_modifiers = {
         'bat_boost': 1,
         'figure_boost': 1,
@@ -61,5 +61,8 @@ def parse_game_modifiers(modifiers_list: list, level: int) -> dict:
 
         case ModEnum.BARRIER.value:
             game_modifiers['barrier'] = True
+
+        case ModEnum.UNCHANGEABLE_LAUNCH_LINE.value:
+            game_modifiers['unchangeable_launch_line'] = True
 
     return game_modifiers

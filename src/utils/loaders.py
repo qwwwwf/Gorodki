@@ -15,7 +15,7 @@ def load_image(filename: str) -> pygame.Surface | None:
     return image
 
 
-# Загрузка карты фигуры
+# Загрузка карты спрайта
 def load_figure(filename: str) -> list:
     filename = 'src/resources/figures/' + filename
 

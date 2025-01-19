@@ -1,7 +1,7 @@
 import pygame
 import random
 
-from src.utils import DARK_BLUE, DEFAULT_GAME_GRAVITY, all_sprites, load_image
+from ..utils import DARK_BLUE, DEFAULT_GAME_GRAVITY, all_sprites, tile_images, WIDTH, HEIGHT
 
 
 # Анимация спрайта
@@ -37,35 +37,23 @@ class AnimatedSprite(pygame.sprite.Sprite):
         self.image = self.frames[self.cur_frame]
 
 
-# Игровой звук
-class GameSound:
-    def __init__(self):
-        pass
-
-    def play_bat_thrown(self):
-        pass
-
-    def play_figure_knocked(self):
-        pass
-
-
 # Эффект партиклов
 class Particle(pygame.sprite.Sprite):
-    fire = [load_image('star.png')]
+    fire = [tile_images['part_of_field']]
 
     for scale in (10, 15, 20):
         fire.append(pygame.transform.scale(fire[0], (scale, scale)))
 
-    def __init__(self, pos, dx, dy):
+    def __init__(self, position: tuple, dx: int, dy: int):
         super().__init__(all_sprites)
         self.image = random.choice(self.fire)
         self.rect = self.image.get_rect()
         self.velocity = [dx, dy]
-        self.rect.x, self.rect.y = pos
+        self.rect.x, self.rect.y = position
 
         self.gravity = DEFAULT_GAME_GRAVITY
 
-    def update(self, screen_rect: tuple = (0, 0, 700, 800)):
+    def update(self, screen_rect: tuple = (0, 0, WIDTH, HEIGHT)):
         self.velocity[1] += self.gravity
         self.rect.x += self.velocity[0]
         self.rect.y += self.velocity[1]

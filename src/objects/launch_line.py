@@ -11,6 +11,7 @@ class LaunchLine(GameObject):
         self.size = self.width, self.height = self.screen_width, 15
         self.x = 0
         self._y = self.screen_height - y
+        self.is_changeable = True
 
     def draw(self):
         pygame.draw.rect(self.screen, LIGHT_BLUE, (self.x, self.y, *self.size))
