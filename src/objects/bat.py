@@ -46,7 +46,7 @@ class Bat(GameObject, pygame.sprite.Sprite):
         self.__throw_sound = pygame.mixer.Sound('src/resources/sounds/throw_sound.wav')
         self.__throw_sound.set_volume(0.2 * GAME_VOLUME)
         self.__is_sound_playing = False
-        self.__max_collision_sounds = 4
+        self.__max_collision_sounds = 3
         self.__collision_sounds_cache = TTLCache(self.__max_collision_sounds, 0.5)
 
         # Создание прямоугольника

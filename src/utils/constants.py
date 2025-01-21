@@ -4,9 +4,13 @@ from ..utils import load_image
 
 # Colors
 BLACK = (0, 0, 0)
+WHITE = (255, 255, 255)
 BLUE = (116, 208, 221)
 DARK_BLUE = (6, 58, 69)
 LIGHT_BLUE = (173, 225, 236)
+
+# Paths
+MAIN_FONT_PATH = 'src/resources/fonts/PIXY.ttf'
 
 # Game's settings
 SIZE = WIDTH, HEIGHT = 700, 800

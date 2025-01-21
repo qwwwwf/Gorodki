@@ -17,10 +17,11 @@ class Game:
         self.__can_create_particles = True
 
         # Game stats
+        self.game_stat = {}
         self.parts_knocked = 0
         self.last_parts_count = 0
         self.game_time = DEFAULT_GAME_TIME
-        self.__total_seconds_passed = 0
+        self.__total_seconds_spent = 0
         self.__bonus_level_is_passed = False
         self.__game_level = 1
         self.__game_modifiers = generate_game_modifiers(self.main_window.is_classic_game)
@@ -36,6 +37,24 @@ class Game:
             darken_surface = pygame.Surface((WIDTH, HEIGHT), pygame.SRCALPHA)
             darken_surface.fill((0, 0, 0, 155))
             self.screen.blit(darken_surface, (0, 0))
+
+            GameInfo(
+                screen=self.screen,
+                position=(WIDTH // 2, HEIGHT // 2),
+                size=60,
+                text='Пауза',
+                color=WHITE,
+                is_center_pos=True
+            )
+
+            GameInfo(
+                screen=self.screen,
+                position=(WIDTH // 2, HEIGHT // 2 + 225),
+                size=30,
+                text='Ctrl+M - выйти в меню',
+                color=LIGHT_BLUE,
+                is_center_pos=True
+            )
 
     def next_level(self):
         game_modifiers = parse_game_modifiers(self.__game_modifiers, self.bat.figures_knocked)
@@ -75,9 +94,18 @@ class Game:
         return round(score)
 
     def stop(self):
-        # Подсчёт игровых очков игрока
-        print(self.__calc_score(), self.__total_seconds_passed)
         self.__is_running = False
+
+        self.game_stat = {
+            'score': self.__calc_score(),
+            'figures_knocked': self.bat.figures_knocked,
+            'total_bits_thrown': self.bat.thrown_count,
+            'bonus_level_passed': self.__bonus_level_is_passed,
+            'seconds_time_spent': round(self.__total_seconds_spent),
+            'game_modifiers_ids': self.__game_modifiers_ids
+        }
+
+        self.main_window.db_passing.add(**self.game_stat)
 
     def run(self):
         # Initial game objects
@@ -103,6 +131,9 @@ class Game:
 
                                 case pygame.K_p:
                                     self.render_pause()
+
+                                case pygame.K_m:
+                                    self.__is_running = False
                         else:
                             match event.key:
                                 case pygame.K_LEFT:
@@ -123,7 +154,7 @@ class Game:
             if not self.__paused:
                 self.screen.fill(BLUE)
                 self.game_time -= 1 / GAME_FPS
-                self.__total_seconds_passed += 1 / GAME_FPS
+                self.__total_seconds_spent += 1 / GAME_FPS
 
                 if (not self.bat.is_thrown and self.bat.thrown_count >= self.__bat_limits) or int(self.game_time <= 0):
                     self.stop()
@@ -163,7 +194,7 @@ class Game:
                     screen=self.screen,
                     position=(350, 730),
                     size=20,
-                    text=f'Автобросок: {self.bat.auto_delay:.0f} сек. | Ctrl+P - пауза',
+                    text=f'Автобросок: {self.bat.auto_delay:.0f} сек. | Ctrl+P - пауза | Ctrl+M - меню',
                     color=(13, 111, 131),
                     is_center_pos=True
                 )
@@ -205,4 +236,4 @@ class Game:
             pygame.display.update()
             self.clock.tick(GAME_FPS)
 
-        self.main_window.start_screen()
+        self.main_window.game_stat_screen(self.game_stat)

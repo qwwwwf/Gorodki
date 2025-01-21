@@ -1,7 +1,7 @@
 import pygame
 
-from src.utils import DARK_BLUE
 from .game_object import GameObject
+from src.utils import DARK_BLUE, MAIN_FONT_PATH
 
 
 class GameInfo(GameObject):
@@ -20,7 +20,7 @@ class GameInfo(GameObject):
         self.size = size
         self.text = text
         self.__color = color
-        self.__font = pygame.font.Font('src/resources/fonts/PIXY.ttf', self.size)
+        self.__font = pygame.font.Font(MAIN_FONT_PATH, self.size)
 
         self.position = position
         self.x, self.y = self.position
