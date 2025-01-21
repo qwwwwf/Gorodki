@@ -20,12 +20,13 @@ class Game:
         self.parts_knocked = 0
         self.last_parts_count = 0
         self.game_time = DEFAULT_GAME_TIME
-        self.game_level = 1
-        self.game_modifiers = generate_game_modifiers()
-        self.game_modifiers_ids = ''.join(
-            sorted(list(set(map(str, list(map(lambda x: x[0], self.game_modifiers))))))).replace('0', '')
+        self.__total_seconds_passed = 0
+        self.__bonus_level_is_passed = False
+        self.__game_level = 1
+        self.__game_modifiers = generate_game_modifiers(self.main_window.is_classic_game)
+        self.__game_modifiers_ids = ''.join(
+            sorted(list(set(map(str, list(map(lambda x: x[0], self.__game_modifiers))))))).replace('0', '')
 
-        print(self.game_modifiers)
         self.run()
 
     def render_pause(self):
@@ -37,8 +38,8 @@ class Game:
             self.screen.blit(darken_surface, (0, 0))
 
     def next_level(self):
-        game_modifiers = parse_game_modifiers(self.game_modifiers, self.bat.figures_knocked)
-        self.figure = Figure(self.screen, f'figure{self.game_level}.txt')
+        game_modifiers = parse_game_modifiers(self.__game_modifiers, self.bat.figures_knocked)
+        self.figure = Figure(self.screen, f'figure{self.__game_level}.txt')
         self.last_parts_count = len(parts_group)
 
         self.bat.speed_boost = game_modifiers['bat_boost']
@@ -50,7 +51,7 @@ class Game:
         self.barrier.is_visible = game_modifiers['barrier']
         self.launch_line.is_changeable = not game_modifiers['unchangeable_launch_line']
 
-    def __calculate_score(self):
+    def __calc_score(self):
         # Базовые параметры
         figures_knocked = self.bat.figures_knocked
         parts_knocked = self.parts_knocked
@@ -61,7 +62,7 @@ class Game:
         level_multiplier = 10  # Множитель за уровень
         parts_multiplier = 2  # Множитель за сбитые части
         penalty_factor = 5  # Штраф за каждый бросок
-        difficulty_factor = 1 + (self.game_level - 1) * 0.1  # Увеличиваем сложность с каждым уровнем
+        difficulty_factor = 1 + (self.__game_level - 1) * 0.1  # Увеличиваем сложность с каждым уровнем
 
         # Формула
         score = (
@@ -75,7 +76,7 @@ class Game:
 
     def stop(self):
         # Подсчёт игровых очков игрока
-        print(self.__calculate_score())
+        print(self.__calc_score(), self.__total_seconds_passed)
         self.__is_running = False
 
     def run(self):
@@ -122,6 +123,7 @@ class Game:
             if not self.__paused:
                 self.screen.fill(BLUE)
                 self.game_time -= 1 / GAME_FPS
+                self.__total_seconds_passed += 1 / GAME_FPS
 
                 if (not self.bat.is_thrown and self.bat.thrown_count >= self.__bat_limits) or int(self.game_time <= 0):
                     self.stop()
@@ -136,13 +138,13 @@ class Game:
                 self.barrier.render()
 
                 # Render game info
-                if self.game_modifiers[self.bat.figures_knocked][0]:
+                if self.__game_modifiers[self.bat.figures_knocked][0]:
                     GameInfo(
                         screen=self.screen,
                         position=(25, 500),
                         size=20,
                         text=f'Применен\nмодификатор:\n-----------------\n'
-                             f'{names_of_modifiers[self.game_modifiers[self.bat.figures_knocked][0]]}',
+                             f'{names_of_modifiers[self.__game_modifiers[self.bat.figures_knocked][0]]}',
                         color=(13, 111, 131)
                     )
 
@@ -177,13 +179,14 @@ class Game:
                     self.__can_create_particles = False
 
                     if not self.bat.is_thrown:
-                        self.game_level += 1
+                        self.__game_level += 1
                         self.bat.figures_knocked += 1
                         self.__can_create_particles = True
 
-                        if self.game_level <= 16:
+                        if self.__game_level <= 16:
                             self.next_level()
                         else:
+                            self.__bonus_level_is_passed = True
                             self.stop()
 
                 if self.bat.auto_delay <= 0:
@@ -201,3 +204,5 @@ class Game:
 
             pygame.display.update()
             self.clock.tick(GAME_FPS)
+
+        self.main_window.start_screen()

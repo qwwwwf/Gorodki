@@ -4,7 +4,7 @@ import pygame
 from cachetools import TTLCache
 from ..objects.game_object import GameObject
 from ..objects.launch_line import LaunchLine
-from ..utils import DEFAULT_BIT_SPEED, DARK_BLUE, parts_group
+from ..utils import DEFAULT_BIT_SPEED, DARK_BLUE, parts_group, GAME_VOLUME
 
 
 class Bat(GameObject, pygame.sprite.Sprite):
@@ -44,7 +44,7 @@ class Bat(GameObject, pygame.sprite.Sprite):
         self.__rps = 6
 
         self.__throw_sound = pygame.mixer.Sound('src/resources/sounds/throw_sound.wav')
-        self.__throw_sound.set_volume(0.2)
+        self.__throw_sound.set_volume(0.2 * GAME_VOLUME)
         self.__is_sound_playing = False
         self.__max_collision_sounds = 4
         self.__collision_sounds_cache = TTLCache(self.__max_collision_sounds, 0.5)
@@ -57,6 +57,13 @@ class Bat(GameObject, pygame.sprite.Sprite):
 
         self.rect = self.rect_surface.get_rect(topleft=(self.x, self.y))
         self.mask = pygame.mask.from_surface(self.rect_surface)
+
+        # Атрибуты для мерцания
+        self.__is_blinking = False
+        self.__blink_start_time = 0
+        self.__blink_duration = 900  # общее количество времени мерцания (в мс)
+        self.__blink_frequency = 0.8  # Количество мерцаний в секунду
+        self.__blink_alpha = 255
 
     def return_to_launch_line(self):
         # Проверка попал ли игрок в фигуру
@@ -71,6 +78,10 @@ class Bat(GameObject, pygame.sprite.Sprite):
         self.y = self.launch_line.y
         self.is_thrown = False
         self.__stop_throw_sound()
+
+        # Начало мерцания
+        self.__is_blinking = True
+        self.__blink_start_time = pygame.time.get_ticks()
 
     def __play_throw_sound(self):
         if not self.__is_sound_playing:
@@ -95,6 +106,11 @@ class Bat(GameObject, pygame.sprite.Sprite):
             self.thrown_count += 1
 
     def draw(self):
+        if self.__is_blinking:
+            self.rect_surface.set_alpha(self.__blink_alpha)
+        else:
+            self.rect_surface.set_alpha(255)
+
         rotated_surface = pygame.transform.rotate(self.rect_surface, self.__angle)
         rotated_rect = rotated_surface.get_rect(center=(self.x, self.y))
 
@@ -120,6 +136,17 @@ class Bat(GameObject, pygame.sprite.Sprite):
 
             if self.y < -20 or 0 >= self.x >= self.screen_width:
                 self.return_to_launch_line()
+
+        # Управление мерцанием
+        if self.__is_blinking:
+            current_time = pygame.time.get_ticks()
+            elapsed_time = current_time - self.__blink_start_time
+
+            if elapsed_time < self.__blink_duration:
+                self.__blink_alpha = int(255 * abs(math.sin(2 * math.pi * self.__blink_frequency * elapsed_time / 1000)))
+            else:
+                self.__is_blinking = False
+                self.__blink_alpha = 255
 
         # Обнаружение столкновения
         rotated_surface = pygame.transform.rotate(self.rect_surface, self.__angle)

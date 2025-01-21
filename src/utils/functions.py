@@ -2,8 +2,11 @@ import random
 from src.utils import ModEnum
 
 
-def generate_game_modifiers() -> list[tuple[int, int | float | None, int | None]]:
-    game_modifiers = random.choices(list(range(10)), weights=[55, 5, 5, 5, 5, 5, 5, 5, 5, 5], k=16)
+def generate_game_modifiers(is_classic_game: bool = False) -> list[tuple[int, int | float | None, int | None]]:
+    if is_classic_game:
+        return [(0,) for _ in range(16)]
+
+    game_modifiers = random.choices(list(range(10)), weights=[46, 6, 6, 6, 6, 6, 6, 6, 6, 6], k=16)
 
     for i in range(len(game_modifiers)):
         match game_modifiers[i]:
