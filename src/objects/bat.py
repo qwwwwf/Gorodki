@@ -43,8 +43,14 @@ class Bat(GameObject, pygame.sprite.Sprite):
         self.__angle = 0
         self.__rps = 6
 
+        # Звук броска биты
         self.__throw_sound = pygame.mixer.Sound('src/resources/sounds/throw_sound.wav')
-        self.__throw_sound.set_volume(0.2)
+        self.__throw_sound.set_volume(0.2 * self.game_object.main_window.game_volume)
+
+        # Звук столкновения с частью фигурой
+        self.__collision_sound = pygame.mixer.Sound('src/resources/sounds/collision_sound.wav')
+        self.__collision_sound.set_volume(0.1 * self.game_object.main_window.game_volume)
+
         self.__is_sound_playing = False
         self.__max_collision_sounds = 3
         self.__collision_sounds_cache = TTLCache(self.__max_collision_sounds, 0.5)
@@ -61,7 +67,7 @@ class Bat(GameObject, pygame.sprite.Sprite):
         # Атрибуты для мерцания
         self.__is_blinking = False
         self.__blink_start_time = 0
-        self.__blink_duration = 900  # общее количество времени мерцания (в мс)
+        self.__blink_duration = 900  # Общее количество времени мерцания (в мс)
         self.__blink_frequency = 0.8  # Количество мерцаний в секунду
         self.__blink_alpha = 255
 
@@ -96,7 +102,7 @@ class Bat(GameObject, pygame.sprite.Sprite):
     def __play_collision_sound(self, part):
         if len(self.__collision_sounds_cache) < self.__max_collision_sounds:
             self.__collision_sounds_cache[part.rect.x] = None
-            part.collision_sound.play()
+            self.__collision_sound.play()
 
     def throw(self):
         if not self.is_thrown:

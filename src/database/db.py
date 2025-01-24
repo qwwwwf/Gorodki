@@ -61,8 +61,20 @@ class Passing(DataBase):
     def get(self, game_id: int) -> tuple | None:
         return self.cursor.execute('SELECT * FROM passing WHERE id = ?', (game_id,)).fetchone()
 
-    def get_all(self) -> list:
-        return self.cursor.execute('SELECT * FROM passing').fetchall()[::-1]
+    def get_all(self, sort_id: int = 1) -> list:
+        match sort_id:
+            case 1:
+                add_condition = 'ORDER BY score'
+            case 2:
+                add_condition = 'ORDER BY totalBitsThrown'
+            case 3:
+                add_condition = 'ORDER BY figuresKnocked'
+            case 4:
+                add_condition = 'ORDER BY secondsTimeSpent'
+            case _:
+                add_condition = ''
+
+        return self.cursor.execute(f'SELECT * FROM passing {add_condition}').fetchall()[::-1]
 
     def get_best_result(self) -> tuple:
         return self.cursor.execute('SELECT id, score FROM passing ORDER BY -score').fetchone()

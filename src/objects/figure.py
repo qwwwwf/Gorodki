@@ -30,9 +30,6 @@ class Part(pygame.sprite.Sprite):
 
         self.is_knocked = False
 
-        self.collision_sound = pygame.mixer.Sound('src/resources/sounds/collision_sound.wav')
-        self.collision_sound.set_volume(0.1)
-
     def update(self):
         if self.is_knocked:
             self.rect.y += self.speed_y

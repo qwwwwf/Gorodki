@@ -242,4 +242,5 @@ class Game:
             pygame.display.update()
             self.clock.tick(GAME_FPS)
 
+        parts_group.empty()
         self.main_window.game_stat_screen(self.game_stat)

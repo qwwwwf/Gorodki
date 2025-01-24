@@ -22,6 +22,7 @@ class MainWindow:
         self.clock = pygame.time.Clock()
 
         self.__player_settings = self.db_player_settings.get()
+        self.__stats_sort_id = 0
         self.game_volume = self.__player_settings[1]
         self.is_classic_game = self.__player_settings[2]
 
@@ -33,16 +34,12 @@ class MainWindow:
         self.__theme.background_color = pygame_menu.baseimage.BaseImage('src/resources/images/background.png')
         self.__theme.selection_color = LIGHT_BLUE
 
-        self.start()
+        self.start_screen()
 
     def terminate(self):
         pygame.quit()
         self.db.close()
         sys.exit()
-
-    def start(self):
-        while True:
-            self.start_screen()
 
     def __change_game_mod(self, value: bool):
         self.is_classic_game = not value
@@ -51,6 +48,10 @@ class MainWindow:
     def __change_game_volume(self, volume: int):
         self.game_volume = volume / 100
         self.db_player_settings.update_values({'gameVolume': self.game_volume})
+
+    def __change_stats_sort(self, sort_id: int):
+        self.__stats_sort_id = sort_id
+        self.stats_screen()
 
     def game_stat_screen(self, game_stat: dict):
         if not game_stat:
@@ -99,17 +100,27 @@ class MainWindow:
             padding=5
         )
 
+        menu.add.dropselect(
+            title='Сортировка',
+            items=[('По порядку', 0), ('Очки', 1), ('Брошено бит', 2), ('Сбито фигур', 3), ('Долгие игры', 4)],
+            default=self.__stats_sort_id,
+            onchange=lambda a, b: self.__change_stats_sort(b),
+            font_size=25,
+            placeholder='Выберите сортировку',
+            selection_box_bgcolor=LIGHT_BLUE
+        )
+
         games_stat_texts = list(map(
             lambda x: f'Игра #{x[0]}\nСчёт: {x[1]}\nФигур сбито: {x[2]}\nБрошено бит: {x[3]}\nБонус: '
                       f'{str(x[4]).replace("0", "не пройден").replace("1", "пройден")}\nПройдено за {x[5]} сек.',
-            self.db_passing.get_all())
+            self.db_passing.get_all(sort_id=self.__stats_sort_id))
         )
 
         if games_stat_texts:
             best_result = self.db_passing.get_best_result()
 
             menu.add.label(
-                title=f'\nЛучший результат: {best_result[1]}\nв игре #{best_result[0]}\n\n\n' + '\n\n'.join(games_stat_texts),
+                title=f'\nЛучший результат: {best_result[1]}\n(игра #{best_result[0]})\n\n' + f'\n{"-" * 30}\n'.join(games_stat_texts),
                 font_size=30
             )
         else:
