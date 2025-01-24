@@ -12,9 +12,9 @@ class DataBase:
     def create_tables(self) -> None:
         self.cursor.executescript(
             """
-            CREATE TABLE IF NOT EXISTS players (
+            CREATE TABLE IF NOT EXISTS settings (
                 id INTEGER PRIMARY KEY AUTOINCREMENT,
-                gameVolume INTEGER NOT NULL DEFAULT 100,
+                gameVolume FLOAT NOT NULL DEFAULT 1,
                 gameWithModifiers BOOLEAN NOT NULL DEFAULT 0
             );
 
@@ -32,24 +32,25 @@ class DataBase:
         )
 
 
-class Player(DataBase):
+class Settings(DataBase):
     def __init__(self):
         super().__init__()
+        self.settings_id = 1
 
-    def get(self, player_id: int) -> tuple | None:
-        return self.cursor.execute('SELECT * FROM players WHERE id = ?', (player_id,)).fetchone()
+    def get(self) -> tuple | None:
+        return self.cursor.execute('SELECT * FROM settings WHERE id = ?', (self.settings_id,)).fetchone()
 
     def get_all(self) -> list:
-        return self.cursor.execute('SELECT * FROM players').fetchall()
+        return self.cursor.execute('SELECT * FROM settings').fetchall()
 
     def update_values(self, values: dict):
-        # TODO: доделать
-        self.cursor.execute('')
+        sql_query = ', '.join(list(map(lambda x: f'{x} = ?', list(values.keys()))))
+        self.cursor.execute(f'UPDATE settings SET {sql_query} WHERE id = ?', tuple(values.values()) + (self.settings_id,))
         self.connection.commit()
 
     def create(self):
-        if not self.get(1):
-            self.cursor.execute('INSERT INTO players (id) VALUES (?)', (1,))
+        if not self.get():
+            self.cursor.execute('INSERT INTO settings (id) VALUES (?)', (self.settings_id,))
             self.connection.commit()
 
 
@@ -57,8 +58,14 @@ class Passing(DataBase):
     def __init__(self):
         super().__init__()
 
+    def get(self, game_id: int) -> tuple | None:
+        return self.cursor.execute('SELECT * FROM passing WHERE id = ?', (game_id,)).fetchone()
+
     def get_all(self) -> list:
         return self.cursor.execute('SELECT * FROM passing').fetchall()[::-1]
+
+    def get_best_result(self) -> tuple:
+        return self.cursor.execute('SELECT id, score FROM passing ORDER BY -score').fetchone()
 
     def add(
             self,

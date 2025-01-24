@@ -32,6 +32,10 @@ class Game:
 
     def render_pause(self):
         self.__paused = not self.__paused
+        self.bat.stop_throw_sound()
+
+        if not self.__paused and self.bat.is_thrown:
+            self.bat.play_throw_sound()
 
         if self.__paused:
             darken_surface = pygame.Surface((WIDTH, HEIGHT), pygame.SRCALPHA)
@@ -93,19 +97,21 @@ class Game:
 
         return round(score)
 
-    def stop(self):
+    def stop(self, write_stats: bool = True):
+        self.bat.stop_throw_sound()
         self.__is_running = False
 
-        self.game_stat = {
-            'score': self.__calc_score(),
-            'figures_knocked': self.bat.figures_knocked,
-            'total_bits_thrown': self.bat.thrown_count,
-            'bonus_level_passed': self.__bonus_level_is_passed,
-            'seconds_time_spent': round(self.__total_seconds_spent),
-            'game_modifiers_ids': self.__game_modifiers_ids
-        }
+        if write_stats:
+            self.game_stat = {
+                'score': self.__calc_score(),
+                'figures_knocked': self.bat.figures_knocked,
+                'total_bits_thrown': self.bat.thrown_count,
+                'bonus_level_passed': self.__bonus_level_is_passed,
+                'seconds_time_spent': round(self.__total_seconds_spent),
+                'game_modifiers_ids': self.__game_modifiers_ids
+            }
 
-        self.main_window.db_passing.add(**self.game_stat)
+            self.main_window.db_passing.add(**self.game_stat)
 
     def run(self):
         # Initial game objects
@@ -133,7 +139,7 @@ class Game:
                                     self.render_pause()
 
                                 case pygame.K_m:
-                                    self.__is_running = False
+                                    self.stop(False)
                         else:
                             match event.key:
                                 case pygame.K_LEFT:

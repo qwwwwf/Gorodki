@@ -4,7 +4,7 @@ import pygame
 from cachetools import TTLCache
 from ..objects.game_object import GameObject
 from ..objects.launch_line import LaunchLine
-from ..utils import DEFAULT_BIT_SPEED, DARK_BLUE, parts_group, GAME_VOLUME
+from ..utils import DEFAULT_BIT_SPEED, DARK_BLUE, parts_group
 
 
 class Bat(GameObject, pygame.sprite.Sprite):
@@ -44,7 +44,7 @@ class Bat(GameObject, pygame.sprite.Sprite):
         self.__rps = 6
 
         self.__throw_sound = pygame.mixer.Sound('src/resources/sounds/throw_sound.wav')
-        self.__throw_sound.set_volume(0.2 * GAME_VOLUME)
+        self.__throw_sound.set_volume(0.2)
         self.__is_sound_playing = False
         self.__max_collision_sounds = 3
         self.__collision_sounds_cache = TTLCache(self.__max_collision_sounds, 0.5)
@@ -77,18 +77,18 @@ class Bat(GameObject, pygame.sprite.Sprite):
         self.x = 340
         self.y = self.launch_line.y
         self.is_thrown = False
-        self.__stop_throw_sound()
+        self.stop_throw_sound()
 
         # Начало мерцания
         self.__is_blinking = True
         self.__blink_start_time = pygame.time.get_ticks()
 
-    def __play_throw_sound(self):
+    def play_throw_sound(self):
         if not self.__is_sound_playing:
             self.__throw_sound.play(-1)
             self.__is_sound_playing = True
 
-    def __stop_throw_sound(self):
+    def stop_throw_sound(self):
         if self.__is_sound_playing:
             self.__throw_sound.stop()
             self.__is_sound_playing = False
@@ -100,7 +100,7 @@ class Bat(GameObject, pygame.sprite.Sprite):
 
     def throw(self):
         if not self.is_thrown:
-            self.__play_throw_sound()
+            self.play_throw_sound()
             self.is_thrown = True
             self.auto_delay = 5
             self.thrown_count += 1

@@ -3,17 +3,17 @@ import pygame_menu
 from src.utils import *
 from src.objects import *
 from src.components.game_screen import Game
-from src.database.db import DataBase, Passing, Player
+from src.database.db import DataBase, Passing, Settings
 
 
 class MainWindow:
     def __init__(self):
         self.db = DataBase()
         self.db_passing = Passing()
-        self.db_player = Player()
+        self.db_player_settings = Settings()
 
         self.db.create_tables()
-        self.db_player.create()
+        self.db_player_settings.create()
 
         pygame.init()
         pygame.display.set_caption('Городки')
@@ -21,7 +21,9 @@ class MainWindow:
         self.screen = pygame.display.set_mode(SIZE)
         self.clock = pygame.time.Clock()
 
-        self.is_classic_game = True
+        self.__player_settings = self.db_player_settings.get()
+        self.game_volume = self.__player_settings[1]
+        self.is_classic_game = self.__player_settings[2]
 
         self.__theme = pygame_menu.themes.THEME_DARK.copy()
         self.__theme.widget_font = MAIN_FONT_PATH
@@ -29,6 +31,7 @@ class MainWindow:
         self.__theme.title_font_size = 45
         self.__theme.widget_font_size = 45
         self.__theme.background_color = pygame_menu.baseimage.BaseImage('src/resources/images/background.png')
+        self.__theme.selection_color = LIGHT_BLUE
 
         self.start()
 
@@ -43,11 +46,11 @@ class MainWindow:
 
     def __change_game_mod(self, value: bool):
         self.is_classic_game = not value
+        self.db_player_settings.update_values({'gameWithModifiers': self.is_classic_game})
 
     def __change_game_volume(self, volume: int):
-        global GAME_VOLUME
-
-        GAME_VOLUME = volume / 100
+        self.game_volume = volume / 100
+        self.db_player_settings.update_values({'gameVolume': self.game_volume})
 
     def game_stat_screen(self, game_stat: dict):
         if not game_stat:
@@ -69,7 +72,7 @@ class MainWindow:
 
     def options_screen(self):
         menu = pygame_menu.Menu('Настройки', 700, 800, theme=self.__theme)
-        menu.add.button('Вернуться обратно', self.start_screen)
+        menu.add.button('Вернуться назад', self.start_screen)
 
         menu.add.toggle_switch(
             title='Модификаторы',
@@ -79,7 +82,7 @@ class MainWindow:
 
         menu.add.range_slider(
             title='Громкость звука',
-            default=GAME_VOLUME * 100,
+            default=self.game_volume * 100,
             range_values=list(range(0, 101)),
             range_text_value_enabled=False,
             range_text_value_tick_enabled=False,
@@ -91,19 +94,26 @@ class MainWindow:
     def stats_screen(self):
         menu = pygame_menu.Menu('Статистика', 700, 800, theme=self.__theme)
         menu.add.button(
-            title='Вернуться обратно',
+            title='Вернуться назад',
             action=self.start_screen,
             padding=5
         )
 
-        games_stat_texts = list(map(lambda x: f'{x[1]}/{x[2]}/{x[3]}/{x[4]}/{x[5]} сек.', self.db_passing.get_all()))
+        games_stat_texts = list(map(
+            lambda x: f'Игра #{x[0]}\nСчёт: {x[1]}\nФигур сбито: {x[2]}\nБрошено бит: {x[3]}\nБонус: '
+                      f'{str(x[4]).replace("0", "не пройден").replace("1", "пройден")}\nПройдено за {x[5]} сек.',
+            self.db_passing.get_all())
+        )
 
-        for game_stat in games_stat_texts:
+        if games_stat_texts:
+            best_result = self.db_passing.get_best_result()
+
             menu.add.label(
-                title=game_stat,
-                padding=5,
-                font_size=35
+                title=f'\nЛучший результат: {best_result[1]}\nв игре #{best_result[0]}\n\n\n' + '\n\n'.join(games_stat_texts),
+                font_size=30
             )
+        else:
+            menu.add.label('История игр пуста')
 
         menu.mainloop(surface=self.screen)
 

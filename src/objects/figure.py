@@ -2,8 +2,7 @@ import random
 import pygame
 
 from .game_object import GameObject
-from src.utils import load_image, load_figure, LIGHT_BLUE, DARK_BLUE, parts_group, tile_images, DEFAULT_FIGURE_SPEED, \
-    GAME_VOLUME
+from src.utils import load_image, load_figure, LIGHT_BLUE, DARK_BLUE, parts_group, tile_images, DEFAULT_FIGURE_SPEED
 
 
 # Генерация фигуры по её карте
@@ -32,7 +31,7 @@ class Part(pygame.sprite.Sprite):
         self.is_knocked = False
 
         self.collision_sound = pygame.mixer.Sound('src/resources/sounds/collision_sound.wav')
-        self.collision_sound.set_volume(0.1 * GAME_VOLUME)
+        self.collision_sound.set_volume(0.1)
 
     def update(self):
         if self.is_knocked:
