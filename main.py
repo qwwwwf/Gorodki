@@ -17,6 +17,7 @@ class MainWindow:
 
         pygame.init()
         pygame.display.set_caption('Городки')
+        pygame.display.set_icon(pygame.image.load('src/resources/images/logo.ico'))
 
         self.screen = pygame.display.set_mode(SIZE)
         self.clock = pygame.time.Clock()
@@ -130,6 +131,8 @@ class MainWindow:
 
     def start_screen(self):
         menu = pygame_menu.Menu('Меню', 700, 800, theme=self.__theme)
+
+        menu.add.image(image_path='src/resources/images/logo.png', scale=(0.2, 0.2), margin=(0, 75))
 
         menu.add.button('Играть', lambda: Game(self))
         menu.add.button('Статистика', lambda: self.stats_screen())
