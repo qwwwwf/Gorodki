@@ -85,9 +85,9 @@ class Game:
         level_multiplier = 10  # Множитель за уровень
         parts_multiplier = 2  # Множитель за сбитые части
         penalty_factor = 5  # Штраф за каждый бросок
-        difficulty_factor = 1 + (self.__game_level - 1) * 0.1  # Увеличиваем сложность с каждым уровнем
+        difficulty_factor = 1 + (self.__game_level - 1) * 0.1  # Множитель сложности с каждым уровнем
 
-        # Формула
+        # Подсчет игровых очков
         score = (
                     (figures_knocked * level_multiplier) +
                     (parts_knocked * parts_multiplier) -
@@ -95,7 +95,7 @@ class Game:
                     time_bonus
                 ) * difficulty_factor
 
-        return round(score)
+        return round(score + (50 if self.__bonus_level_is_passed else 0))
 
     def stop(self, write_stats: bool = True):
         self.bat.stop_throw_sound()
