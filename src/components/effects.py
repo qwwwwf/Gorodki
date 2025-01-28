@@ -4,39 +4,6 @@ import random
 from ..utils import DARK_BLUE, DEFAULT_GAME_GRAVITY, all_sprites, tile_images, WIDTH, HEIGHT
 
 
-# Анимация спрайта
-class AnimatedSprite(pygame.sprite.Sprite):
-    """
-    Создает анимацию и применяет ее к спрайту
-
-    :param sheet: Спрайт с анимацией
-    :param columns: Количество колонок у спрайта
-    :param rows: Количество рядов у спрайта
-    :param x: Изначальное местоположение спрайта на оси абсцисс
-    :param y: Изначальное местоположение спрайта на оси ординат
-    """
-
-    def __init__(self, sheet: pygame.Surface, columns: int, rows: int, x: int, y: int):
-        super().__init__(all_sprites)
-        self.frames = []
-        self.cut_sheet(sheet, columns, rows)
-        self.cur_frame = 0
-        self.image = self.frames[self.cur_frame]
-        self.rect = self.rect.move(x, y)
-
-    def cut_sheet(self, sheet: pygame.Surface, columns: int, rows: int):
-        self.rect = pygame.Rect(0, 0, sheet.get_width() // columns, sheet.get_height() // rows)
-
-        for j in range(rows):
-            for i in range(columns):
-                frame_location = (self.rect.w * i, self.rect.h * j)
-                self.frames.append(sheet.subsurface(pygame.Rect(frame_location, self.rect.size)))
-
-    def update(self):
-        self.cur_frame = (self.cur_frame + 1) % len(self.frames)
-        self.image = self.frames[self.cur_frame]
-
-
 # Эффект партиклов
 class Particle(pygame.sprite.Sprite):
     fire = [tile_images['part_of_field']]
