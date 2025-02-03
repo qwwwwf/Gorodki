@@ -24,6 +24,7 @@ class Game:
         self.__total_seconds_spent = 0
         self.__bonus_level_is_passed = False
         self.__game_level = 1
+        self.__saved_bat_auto_delay = 5
         self.__game_modifiers = generate_game_modifiers(self.main_window.is_classic_game)
         self.__game_modifiers_ids = ''.join(
             sorted(list(set(map(str, list(map(lambda x: x[0], self.__game_modifiers))))))).replace('0', '')
@@ -117,6 +118,7 @@ class Game:
         # Initial game objects
         self.launch_line = LaunchLine(self.screen)
         self.bat = Bat(self.screen, self, self.launch_line)
+        self.__saved_bat_auto_delay = self.bat.auto_delay
         self.barrier = Barrier(self.screen, self.bat)
         self.next_level()
 
@@ -141,17 +143,18 @@ class Game:
                                 case pygame.K_m:
                                     self.stop(False)
                         else:
-                            match event.key:
-                                case pygame.K_LEFT:
-                                    self.bat.is_moving = True
-                                    self.bat.is_right_move = False
+                            if self.bat.auto_delay <= self.__saved_bat_auto_delay:
+                                match event.key:
+                                    case pygame.K_LEFT:
+                                        self.bat.is_moving = True
+                                        self.bat.is_right_move = False
 
-                                case pygame.K_RIGHT:
-                                    self.bat.is_moving = True
-                                    self.bat.is_right_move = True
+                                    case pygame.K_RIGHT:
+                                        self.bat.is_moving = True
+                                        self.bat.is_right_move = True
 
-                                case pygame.K_SPACE | pygame.K_UP:
-                                    self.bat.throw()
+                                    case pygame.K_SPACE | pygame.K_UP:
+                                        self.bat.throw()
 
                     # Если клавиша отжата
                     case pygame.KEYUP:

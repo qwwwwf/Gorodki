@@ -23,6 +23,7 @@ class MainWindow:
         self.clock = pygame.time.Clock()
 
         self.__player_settings = self.db_player_settings.get()
+        self.__volume_set = 0
         self.__stats_sort_id = 0
         self.game_volume = self.__player_settings[1]
         self.is_classic_game = self.__player_settings[2]
@@ -47,7 +48,7 @@ class MainWindow:
         self.db_player_settings.update_values({'gameWithModifiers': self.is_classic_game})
 
     def __change_game_volume(self, volume: int):
-        self.game_volume = volume / 100
+        self.game_volume = volume / 10
         self.db_player_settings.update_values({'gameVolume': self.game_volume})
 
     def __change_stats_sort(self, sort_id: int):
@@ -84,8 +85,8 @@ class MainWindow:
 
         menu.add.range_slider(
             title='Громкость звука',
-            default=self.game_volume * 100,
-            range_values=list(range(0, 101)),
+            default=self.game_volume * 10,
+            range_values=list(range(0, 11)),
             range_text_value_enabled=False,
             range_text_value_tick_enabled=False,
             onchange=lambda x: self.__change_game_volume(x)
@@ -135,9 +136,9 @@ class MainWindow:
         menu.add.image(image_path='src/resources/images/logo.png', scale=(0.2, 0.2), margin=(0, 75))
 
         menu.add.button('Играть', lambda: Game(self))
-        menu.add.button('Статистика', lambda: self.stats_screen())
-        menu.add.button('Настройки', lambda: self.options_screen())
-        menu.add.button('Выйти из игры', pygame_menu.events.EXIT)
+        menu.add.button('Статистика', self.stats_screen)
+        menu.add.button('Настройки', self.options_screen)
+        menu.add.button('Выйти из игры', self.terminate)
 
         menu.mainloop(surface=self.screen)
 

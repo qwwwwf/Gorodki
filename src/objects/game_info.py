@@ -12,7 +12,8 @@ class GameInfo(GameObject):
             size: int = 40,
             text: str = '00',
             color: tuple = DARK_BLUE,
-            is_center_pos: bool = False):
+            is_center_pos: bool = False
+    ):
         super().__init__(screen)
 
         self.screen_rect = self.screen.get_rect()
@@ -55,8 +56,12 @@ class GameInfo(GameObject):
         self.convert_to_image()
 
         if self.__is_center_pos:
-            for text_rect in self.text_rects:
-                text_rect.center = self.x, self.y
+            total_height = len(self.text_imgs) * self.size
+            start_y = self.y - total_height // 2
+
+            for i, text_rect in enumerate(self.text_rects):
+                text_rect.centerx = self.x
+                text_rect.centery = start_y + i * self.size
 
         for text_img, text_rect in zip(self.text_imgs, self.text_rects):
             self.screen.blit(text_img, text_rect)

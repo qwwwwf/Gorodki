@@ -108,7 +108,7 @@ class Bat(GameObject, pygame.sprite.Sprite):
         if not self.is_thrown:
             self.play_throw_sound()
             self.is_thrown = True
-            self.auto_delay = 5
+            self.auto_delay = 5.3
             self.thrown_count += 1
 
     def draw(self):
