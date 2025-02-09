@@ -12,7 +12,7 @@ class Game:
 
         # Game edit
         self.__is_running = True
-        self.__bat_limits = 28
+        self.__bat_limits = 30
         self.__paused = False
         self.__can_create_particles = True
 
