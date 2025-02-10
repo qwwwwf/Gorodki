@@ -3,7 +3,10 @@ import sqlite3
 
 class DataBase:
     def __init__(self):
-        self.connection = sqlite3.connect('src/database/data.db')
+        self.connection = sqlite3.connect(
+            database='src/database/data.db',
+            timeout=10
+        )
         self.cursor = self.connection.cursor()
 
     def close(self) -> None:
